@@ -13,14 +13,14 @@ class Nav2dVeryEasyEnv(Nav2dEnv):
     def __init__(self):
         Nav2dEnv.__init__(self)
 
-    def reset(self):
+    def reset(self, goal_x=200, goal_y=200, agent_x=10, agent_y=10):
         # Fixed start point and fixed goal point
         self.count_actions = 0
         self.positions = []
-        self.agent_x = 10
-        self.agent_y = 10
-        self.goal_x = 200
-        self.goal_y = 200
+        self.agent_x = agent_x
+        self.agent_y = agent_y
+        self.goal_x = goal_x
+        self.goal_y = goal_y
         if self.goal_y == self.agent_y or self.goal_x == self.agent_x:
             self.reset()
         self.positions.append([self.agent_x, self.agent_y])

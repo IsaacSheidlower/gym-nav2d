@@ -78,13 +78,19 @@ class Nav2dEnv(gym.Env):
         return np.array(normalized_obs)
 
     def _calculate_position(self, action):
-        angle = (action[0] + 1) * math.pi + math.pi / 2
-        if angle > 2 * math.pi:
-            angle -= 2 * math.pi
-        step_size = (action[1] + 1) / 2 * self.max_step_size
-        # calculate new agent state
-        self.agent_x = self.agent_x + math.cos(angle) * step_size
-        self.agent_y = self.agent_y + math.sin(angle) * step_size
+        if not self.xy_control:
+            angle = (action[0] + 1) * math.pi + math.pi / 2
+            if angle > 2 * math.pi:
+                angle -= 2 * math.pi
+            step_size = (action[1] + 1) / 2 * self.max_step_size
+            # calculate new agent state
+            self.agent_x = self.agent_x + math.cos(angle) * step_size
+            self.agent_y = self.agent_y + math.sin(angle) * step_size
+        else:
+            # clip actions
+            action = np.clip(action, self.action_step_low, self.action_step_high)
+            self.agent_x = self.agent_x + action[0]
+            self.agent_y = self.agent_y + action[1]
 
         # borders
         if self.agent_x < 0:
@@ -122,7 +128,7 @@ class Nav2dEnv(gym.Env):
             rew) + ", agent pos: (" + str(self.agent_x) + "," + str(self.agent_y) + ")", "goal pos: (" + str(
             self.goal_x) + "," + str(self.goal_y) + "), done: " + str(done)
 
-        return normalized_obs, rew, done, info
+        return normalized_obs, rew, done, {"info":info}
 
     def reset(self):
         self.count_actions = 0
@@ -150,40 +156,63 @@ class Nav2dEnv(gym.Env):
         if mode == 'ansi':
             return self._observation()
         elif mode == 'human':
-            from gym.envs.classic_control import rendering
+            import matplotlib.pyplot as plt
+            import matplotlib.patches as patches
+            import matplotlib.lines as lines
+            import matplotlib.transforms as transforms
+            import matplotlib.animation as animation
+            from matplotlib.animation import FuncAnimation
+
+            # create figure
             if self.viewer is None:
-                self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
+                self.viewer = plt.figure(figsize=(6, 6))
+                self.viewer.canvas.set_window_title("GoalEnv")
+                self.ax = self.viewer.add_subplot(111)
+                self.ax.set_xlim(0, self.screen_width)
+                self.ax.set_ylim(0, self.screen_height)
+                self.ax.set_aspect('equal')
+                self.ax.set_xticks([])
+                self.ax.set_yticks([])
+                self.ax.set_title("GoalEnv")
+                self.ax.set_xlabel("x")
+                self.ax.set_ylabel("y")
+                self.ax.grid(True)
 
-            #track the way, the agent has gone
-            self.track_way = rendering.make_polyline(np.dot(self.positions, self.scale))
-            self.track_way.set_linewidth(4)
-            self.viewer.add_geom(self.track_way)
+                # # create court
+                # self.ax.add_patch(
+                #     patches.Rectangle(
+                #         (0, 0), self.len_court_x, self.len_court_y, fill=False, linewidth=1, edgecolor='black'
+                #     )
+                # )
 
-            # draw the agent
-            car = rendering.make_circle(5)
-            self.agent_trans = rendering.Transform()
-            car.add_attr(self.agent_trans)
-            car.set_color(0, 0, 255)
-            self.viewer.add_geom(car)
 
-            goal = rendering.make_circle(5)
-            goal.add_attr(rendering.Transform(translation=(self.goal_x*self.scale, self.goal_y*self.scale)))
-            goal.set_color(255, 0, 0)
-            self.viewer.add_geom(goal)
+                # create goal
+                self.goal = patches.Circle((self.goal_x, self.goal_y), 5, fc='r')
+                self.ax.add_patch(self.goal)
 
-            self.agent_trans.set_translation(self.agent_x * self.scale, self.agent_y * self.scale)
+                # create agent
+                self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b')
+                self.ax.add_patch(self.agent)
 
-            return self.viewer.render(return_rgb_array=mode == 'rgb_array')
-        elif mode == "rgb_array":
-            super(Nav2dEnv, self).render(mode=mode)
-        else:
-            super(Nav2dEnv, self).render(mode=mode)
+                # create line
+                self.line, = self.ax.plot([], [], 'b-')
+
+            # show figure
+            self.agent.center = (self.agent_x, self.agent_y)
+            self.goal.center = (self.goal_x, self.goal_y)
+            #self.line.set_data(*zip(*self.positions))
+            self.viewer.canvas.draw()
+            plt.pause(0.0001)
+            return self.viewer
+        
+
+
 
     def close(self):
-        if self.viewer:
-            self.viewer.close()
-            self.viewer = None
-
+        # if self.viewer:
+        #     self.viewer.close()
+        #     self.viewer = None
+        pass
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return seed
