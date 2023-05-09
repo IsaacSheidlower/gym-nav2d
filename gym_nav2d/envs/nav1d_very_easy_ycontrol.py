@@ -5,25 +5,20 @@ import math
 from gym_nav2d.envs.nav2d_env import Nav2dEnv
 
 
-class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
+class Nav1dVeryEasyYControlEnv(Nav2dEnv):
     # this is a list of supported rendering modes!
     metadata = {'render.modes': ['human', 'ansi'],
                 'video.frames_per_second': 30}
 
     def __init__(self):
         Nav2dEnv.__init__(self)
+        self.action_space = spaces.Box(np.array([self.action_angle_low]), 
+                                       np.array([self.action_angle_high]), dtype=np.float32)
 
     def _calculate_position(self, action):
         action = np.clip(action, self.action_step_low, self.action_step_high)
-        self.agent_x = self.agent_x + action[0]
-        print("action", action)
-        self.agent_y = self.agent_y + action[1]
+        self.agent_y = self.agent_y + action[0]
 
-        # borders
-        if self.agent_x < 0:
-            self.agent_x = 0
-        if self.agent_x > self.len_court_x:
-            self.agent_x = self.len_court_x
         if self.agent_y < 0:
             self.agent_y = 0
         if self.agent_y > self.len_court_y:
@@ -51,7 +46,7 @@ class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
 
         normalized_obs = self._normalize_observation(obs)
 
-        info = "Debug:" + "actions performed:" + str(self.count_actions) + ", act:" + str(action[0]) + "," + str(action[1]) + ", dist:" + str(normalized_obs[4]) + ", rew:" + str(
+        info = "Debug:" + "actions performed:" + str(self.count_actions) + ", act:" + str(action[0]) + ", dist:" + str(normalized_obs[4]) + ", rew:" + str(
             rew) + ", agent pos: (" + str(self.agent_x) + "," + str(self.agent_y) + ")", "goal pos: (" + str(
             self.goal_x) + "," + str(self.goal_y) + "), done: " + str(done)
 

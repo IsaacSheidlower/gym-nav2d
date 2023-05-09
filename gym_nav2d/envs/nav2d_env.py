@@ -20,7 +20,7 @@ class Nav2dEnv(gym.Env):
         self.obs_high_state = np.array([1, 1, 1, 1, 1])
         self.observation_space = spaces.Box(self.obs_low_state, self.obs_high_state, dtype=np.float32)
 
-        self.max_steps = 100
+        self.max_steps = 1000
         self.max_step_size = 10
         # action space: change direction in rad (discrete), run into this direction (Box)
         self.action_angle_low = -1
@@ -62,7 +62,7 @@ class Nav2dEnv(gym.Env):
     #  extra rewarding reaching the goal and learning to do this by few steps as possible
     def _reward_goal_reached(self):
         # 1000 - (distance)/10 - (sum of actions)
-        return 1000
+        return 100
 
     def _step_reward(self):
         return - self._distance()/10 - 1
