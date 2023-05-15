@@ -31,7 +31,7 @@ class Nav2dEnv(gym.Env):
                                        np.array([self.action_angle_high, self.action_step_high]), dtype=np.float32)
 
         self.count_actions = 0  # count actions for rewarding
-        self.eps = 5  # distance to goal, that has to be reached to solve env
+        self.eps = 2  # distance to goal, that has to be reached to solve env
         self.np_random = None  # random generator
 
         # agent
@@ -166,7 +166,7 @@ class Nav2dEnv(gym.Env):
             # create figure
             if self.viewer is None:
                 self.viewer = plt.figure(figsize=(6, 6))
-                self.viewer.canvas.set_window_title("GoalEnv")
+                #self.viewer.canvas.set_window_title("GoalEnv")
                 self.ax = self.viewer.add_subplot(111)
                 self.ax.set_xlim(0, self.screen_width)
                 self.ax.set_ylim(0, self.screen_height)

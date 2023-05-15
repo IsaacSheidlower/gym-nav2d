@@ -34,3 +34,8 @@ register(
     id='nav1dVeryEasyYControl-v0',
     entry_point='gym_nav2d.envs:Nav1dVeryEasyYControlEnv',
 )
+
+register(
+    id='nav2dVeryEasyXPenalty-v0',
+    entry_point='gym_nav2d.envs:Nav2dVeryEasyXPenaltyEnv',
+)

@@ -37,6 +37,7 @@ class Nav2dVeryEasyXPenaltyEnv(Nav2dEnv):
 
         # done for rewarding
         done = bool(obs[4] <= self.eps)
+        #print("obs[4]", obs[4], "eps", self.eps)
         rew = 0
         if not done:
             rew += self._step_reward()
@@ -56,7 +57,6 @@ class Nav2dVeryEasyXPenaltyEnv(Nav2dEnv):
         info = "Debug:" + "actions performed:" + str(self.count_actions) + ", act:" + str(action[0]) + "," + str(action[1]) + ", dist:" + str(normalized_obs[4]) + ", rew:" + str(
             rew) + ", agent pos: (" + str(self.agent_x) + "," + str(self.agent_y) + ")", "goal pos: (" + str(
             self.goal_x) + "," + str(self.goal_y) + "), done: " + str(done)
-
         return normalized_obs, rew, done, {"info":info}
     
     def reset(self, goal_x=200, goal_y=200, agent_x=200, agent_y=10):
