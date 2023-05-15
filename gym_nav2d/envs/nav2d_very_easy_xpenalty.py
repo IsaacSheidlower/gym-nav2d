@@ -5,7 +5,7 @@ import math
 from gym_nav2d.envs.nav2d_env import Nav2dEnv
 
 
-class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
+class Nav2dVeryEasyXPenaltyEnv(Nav2dEnv):
     # this is a list of supported rendering modes!
     metadata = {'render.modes': ['human', 'ansi'],
                 'video.frames_per_second': 30}
@@ -40,6 +40,8 @@ class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
         rew = 0
         if not done:
             rew += self._step_reward()
+            if self.agent_x < self.goal_x-20 or self.agent_x > self.goal_x+20:
+                rew = -20
         else:
             rew += self._reward_goal_reached()
 

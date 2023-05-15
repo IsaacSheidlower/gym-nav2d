@@ -6,3 +6,4 @@ from gym_nav2d.envs.nav2d_very_hard import Nav2dVeryHardEnv
 from gym_nav2d.envs.nav2d_easy_xycontrol import Nav2dEasyXYControlEnv
 from gym_nav2d.envs.nav2d_very_easy_xycontrol import Nav2dVeryEasyXYControlEnv
 from gym_nav2d.envs.nav1d_very_easy_ycontrol import Nav1dVeryEasyYControlEnv
+from gym_nav2d.envs.nav2d_very_easy_xpenalty import Nav2dVeryEasyXPenaltyEnv
