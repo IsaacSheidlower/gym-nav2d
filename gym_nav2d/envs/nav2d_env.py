@@ -13,8 +13,8 @@ class Nav2dEnv(gym.Env):
     def __init__(self):
         self.debug = False
         # define the environment and the observations
-        self.len_court_x = 255              # the size of the environment
-        self.len_court_y = 255              # the size of the environment
+        self.len_court_x = 400              # the size of the environment
+        self.len_court_y = 400              # the size of the environment
 
         self.obs_low_state = np.array([-1, -1, -1, -1, 0]) # x_agent,y_agent, x_goal, y_goal, distance
         self.obs_high_state = np.array([1, 1, 1, 1, 1])
