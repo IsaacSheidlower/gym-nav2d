@@ -8,3 +8,4 @@ from gym_nav2d.envs.nav2d_very_easy_xycontrol import Nav2dVeryEasyXYControlEnv
 from gym_nav2d.envs.nav1d_very_easy_ycontrol import Nav1dVeryEasyYControlEnv
 from gym_nav2d.envs.nav2d_very_easy_xpenalty import Nav2dVeryEasyXPenaltyEnv
 from gym_nav2d.envs.nav2d_medium_xpenalty import Nav2dMediumXPenaltyEnv
+from gym_nav2d.envs.nav2d_medium_noDist_xpenalty import Nav2dMediumNoDistXPenaltyEnv

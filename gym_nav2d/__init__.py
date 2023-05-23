@@ -44,3 +44,8 @@ register(
     id='nav2dMediumXPenalty-v0',
     entry_point='gym_nav2d.envs:Nav2dMediumXPenaltyEnv',
 )
+
+register(
+    id='nav2dMediumNoDistXPenalty-v0',
+    entry_point='gym_nav2d.envs:Nav2dMediumNoDistXPenaltyEnv',
+)
