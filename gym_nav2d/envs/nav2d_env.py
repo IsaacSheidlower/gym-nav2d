@@ -197,6 +197,13 @@ class Nav2dEnv(gym.Env):
                 self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b')
                 self.ax.add_patch(self.agent)
 
+                # shade areas x>180 and x<220   
+                self.ax.add_patch(
+                    patches.Rectangle(
+                        (180, 0), 40, 400, fill=True, linewidth=1, edgecolor='black', facecolor='grey', alpha=0.5
+                    )
+                )
+                
                 # create line
                 self.line, = self.ax.plot([], [], 'b-')
 

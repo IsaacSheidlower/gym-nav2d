@@ -65,12 +65,16 @@ class Nav2dMediumNoDistXPenaltyEnv(Nav2dEnv):
         # semi random start point and fixed goal point
         self.count_actions = 0
         self.positions = []
-        self.agent_x = agent_x
+        if agent_x is None:
+            self.agent_x = np.random.randint(180, 220)
+        else:
+            self.agent_x = agent_x
         if agent_y is None:
-            if np.random.uniform() < 0.5:
-                self.agent_y = 10
-            else:
-                self.agent_y = 390
+            self.agent_y = np.random.randint(5, 395)
+            # if np.random.uniform() < 0.5:
+            #     self.agent_y = 10
+            # else:
+            #     self.agent_y = 390
         else:
             self.agent_y = agent_y
         self.goal_x = goal_x
