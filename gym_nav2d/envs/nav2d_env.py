@@ -16,11 +16,13 @@ class Nav2dEnv(gym.Env):
         self.len_court_x = 400              # the size of the environment
         self.len_court_y = 400              # the size of the environment
 
-        # self.obs_low_state = np.array([-1, -1, -1, -1, 0]) # x_agent,y_agent, x_goal, y_goal, distance
-        # self.obs_high_state = np.array([1, 1, 1, 1, 1])
+        # TO INCLUDE DISTANCE TO GOAL
+        self.obs_low_state = np.array([-1, -1, -1, -1, 0]) # x_agent,y_agent, x_goal, y_goal, distance
+        self.obs_high_state = np.array([1, 1, 1, 1, 1])
 
-        self.obs_low_state = np.array([-1, -1, -1, -1]) # x_agent,y_agent, x_goal, y_goal, distance
-        self.obs_high_state = np.array([1, 1, 1, 1])
+        # NO DISTANCE TO GOAL
+        # self.obs_low_state = np.array([-1, -1, -1, -1]) # x_agent,y_agent, x_goal, y_goal, distance
+        # self.obs_high_state = np.array([1, 1, 1, 1])
         self.observation_space = spaces.Box(self.obs_low_state, self.obs_high_state, dtype=np.float32)
 
         self.max_steps = 1000
