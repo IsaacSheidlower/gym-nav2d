@@ -5,7 +5,7 @@ import math
 from gym_nav2d.envs.nav2d_env import Nav2dEnv
 
 
-class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
+class Nav2dMediumNoDistXPenaltyEnv(Nav2dEnv):
     # this is a list of supported rendering modes!
     metadata = {'render.modes': ['human', 'ansi'],
                 'video.frames_per_second': 30}
@@ -37,9 +37,12 @@ class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
 
         # done for rewarding
         done = bool(obs[4] <= self.eps)
+        #print("obs[4]", obs[4], "eps", self.eps)
         rew = 0
         if not done:
             rew += self._step_reward()
+            if self.agent_x < self.goal_x-20 or self.agent_x > self.goal_x+20:
+                rew = -40
         else:
             rew += self._reward_goal_reached()
 
@@ -54,16 +57,26 @@ class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
         info = "Debug:" + "actions performed:" + str(self.count_actions) + ", act:" + str(action[0]) + "," + str(action[1]) + ", dist:" + str(normalized_obs[4]) + ", rew:" + str(
             rew) + ", agent pos: (" + str(self.agent_x) + "," + str(self.agent_y) + ")", "goal pos: (" + str(
             self.goal_x) + "," + str(self.goal_y) + "), done: " + str(done)
-        self.last_action = action
-        
+        # set normalized obs to first 4 elements
+        normalized_obs = normalized_obs[:4]
         return normalized_obs, rew, done, {"info":info}
     
-    def reset(self, goal_x=200, goal_y=200, agent_x=200, agent_y=10):
-        # Fixed start point and fixed goal point
+    def reset(self, goal_x=200, goal_y=200, agent_x=200, agent_y=None):
+        # semi random start point and fixed goal point
         self.count_actions = 0
         self.positions = []
-        self.agent_x = agent_x
-        self.agent_y = agent_y
+        if agent_x is None:
+            self.agent_x = np.random.randint(180, 220)
+        else:
+            self.agent_x = agent_x
+        if agent_y is None:
+            self.agent_y = np.random.randint(5, 395)
+            # if np.random.uniform() < 0.5:
+            #     self.agent_y = 10
+            # else:
+            #     self.agent_y = 390
+        else:
+            self.agent_y = agent_y
         self.goal_x = goal_x
         self.goal_y = goal_y
         if self.goal_y == self.agent_y:
@@ -74,4 +87,7 @@ class Nav2dVeryEasyXYControlEnv(Nav2dEnv):
             print("scale x/y  - x/y", self.agent_x*self.scale, self.agent_y*self.scale, self.goal_x*self.scale,
                   self.goal_y*self.scale)
         obs = self._observation()
-        return self._normalize_observation(obs)
+        normalized_obs = self._normalize_observation(obs)
+        # set normalized obs to first 4 elements
+        normalized_obs = normalized_obs[:4]
+        return normalized_obs  

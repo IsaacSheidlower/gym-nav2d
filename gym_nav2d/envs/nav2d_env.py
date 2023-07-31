@@ -1,3 +1,4 @@
+import os
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
@@ -54,7 +55,10 @@ class Nav2dEnv(gym.Env):
         self.viewer = None                  # viewer for render()
         self.agent_trans = None             # Transform-object of the moving agent
         self.track_way = None               # polyline object to draw the tracked way
-        self.scale = self.screen_width/self.len_court_x
+        self.scale = self.screen_width/self.len_court_x 
+        
+        # set self.last_action to 0,0
+        self.last_action = np.array([0, 0])
 
         # set a seed and reset the environment
         self.seed()
@@ -133,6 +137,8 @@ class Nav2dEnv(gym.Env):
             rew) + ", agent pos: (" + str(self.agent_x) + "," + str(self.agent_y) + ")", "goal pos: (" + str(
             self.goal_x) + "," + str(self.goal_y) + "), done: " + str(done)
 
+        self.last_action = action
+
         return normalized_obs, rew, done, {"info":info}
 
     def reset(self):
@@ -155,6 +161,7 @@ class Nav2dEnv(gym.Env):
             print("scale x/y  - x/y", self.agent_x*self.scale, self.agent_y*self.scale, self.goal_x*self.scale, self.goal_y*self.scale)
 
         obs = self._observation()
+        self.last_action = np.array([0, 0])
         return self._normalize_observation(obs)
 
     def render(self, mode='human'):
@@ -196,8 +203,12 @@ class Nav2dEnv(gym.Env):
                 self.ax.add_patch(self.goal)
 
                 # create agent
-                self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b')
-                self.ax.add_patch(self.agent)
+                self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b', alpha=1)
+                # self.ax.add_patch(self.agent)
+                # render agent as triangle (arrow) facing the direction of the last action
+                # the last action is of the form [x,y] with x,y in [-1,1]
+                # self.agent = patches.RegularPolygon((self.agent_x, self.agent_y), 3, 10, np.arctan2(self.last_action[1], self.last_action[0])-np.pi/2, fc='b')
+                # self.ax.add_patch(self.agent)
 
                 # shade areas x>180 and x<220   
                 self.ax.add_patch(
@@ -209,8 +220,29 @@ class Nav2dEnv(gym.Env):
                 # create line
                 self.line, = self.ax.plot([], [], 'b-')
 
+                # load car image
+                curr_path = os.path.dirname(os.path.abspath(__file__))
+                self.robot_img = plt.imread(curr_path + "/robot.png")
+                self.robot_size = 10
+                self.robot = self.ax.imshow(self.robot_img, extent=[self.agent_x-self.robot_size, self.agent_x+self.robot_size, self.agent_y-self.robot_size, self.agent_y+self.robot_size], alpha=1)
+
             # show figure
+            # leave a trace of the agent
+            new_agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b', alpha=0.01)
+            self.ax.add_patch(new_agent)
             self.agent.center = (self.agent_x, self.agent_y)
+            # self.ax.add_patch(self.agent)
+            # update the robot image
+            self.robot.set_extent([self.agent_x-self.robot_size, self.agent_x+self.robot_size, self.agent_y-self.robot_size, self.agent_y+self.robot_size])
+
+            # self.agent = patches.RegularPolygon((self.agent_x, self.agent_y), 3, 10, np.arctan2(self.last_action[1], self.last_action[0])-np.pi/2, fc='b', alpha=0.01)
+            # self.ax.add_patch(self.agent)
+            # new_angle = np.arctan2(self.last_action[1], self.last_action[0]) - np.pi/2
+            # # smooth angle change
+            # new_angle = (new_angle + self.agent.orientation)/2
+            # self.agent = patches.RegularPolygon((self.agent_x, self.agent_y), 3, 10, new_angle, fc='b')
+            # self.ax.add_patch(self.agent)
+
             self.goal.center = (self.goal_x, self.goal_y)
             #self.line.set_data(*zip(*self.positions))
             self.viewer.canvas.draw()
