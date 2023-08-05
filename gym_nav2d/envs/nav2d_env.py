@@ -3,7 +3,7 @@ import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
 import numpy as np
-import math
+import math, time
 
 
 class Nav2dEnv(gym.Env):
@@ -18,12 +18,12 @@ class Nav2dEnv(gym.Env):
         self.len_court_y = 400              # the size of the environment
 
         # TO INCLUDE DISTANCE TO GOAL
-        self.obs_low_state = np.array([-1, -1, -1, -1, 0]) # x_agent,y_agent, x_goal, y_goal, distance
-        self.obs_high_state = np.array([1, 1, 1, 1, 1])
+        # self.obs_low_state = np.array([-1, -1, -1, -1, 0]) # x_agent,y_agent, x_goal, y_goal, distance
+        # self.obs_high_state = np.array([1, 1, 1, 1, 1])
 
         # NO DISTANCE TO GOAL
-        # self.obs_low_state = np.array([-1, -1, -1, -1]) # x_agent,y_agent, x_goal, y_goal, distance
-        # self.obs_high_state = np.array([1, 1, 1, 1])
+        self.obs_low_state = np.array([-1, -1, -1, -1]) # x_agent,y_agent, x_goal, y_goal, distance
+        self.obs_high_state = np.array([1, 1, 1, 1])
         self.observation_space = spaces.Box(self.obs_low_state, self.obs_high_state, dtype=np.float32)
 
         self.max_steps = 1000
@@ -37,7 +37,7 @@ class Nav2dEnv(gym.Env):
                                        np.array([self.action_angle_high, self.action_step_high]), dtype=np.float32)
 
         self.count_actions = 0  # count actions for rewarding
-        self.eps = 2  # distance to goal, that has to be reached to solve env
+        self.eps = 3  # distance to goal, that has to be reached to solve env
         self.np_random = None  # random generator
 
         # agent
@@ -50,8 +50,8 @@ class Nav2dEnv(gym.Env):
         self.goal_y = 0
 
         # rendering
-        self.screen_height = 600
-        self.screen_width = 600
+        self.screen_height = 415
+        self.screen_width = 400
         self.viewer = None                  # viewer for render()
         self.agent_trans = None             # Transform-object of the moving agent
         self.track_way = None               # polyline object to draw the tracked way
@@ -164,7 +164,7 @@ class Nav2dEnv(gym.Env):
         self.last_action = np.array([0, 0])
         return self._normalize_observation(obs)
 
-    def render(self, mode='human'):
+    def render(self, mode='human', agent_color='b', subgoals=None, subgoal_colors=None):
         if mode == 'ansi':
             return self._observation()
         elif mode == 'human':
@@ -199,11 +199,11 @@ class Nav2dEnv(gym.Env):
 
 
                 # create goal
-                self.goal = patches.Circle((self.goal_x, self.goal_y), 5, fc='r')
+                self.goal = patches.Circle((self.goal_x, self.goal_y), 5, fc='r', zorder=10)
                 self.ax.add_patch(self.goal)
 
                 # create agent
-                self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b', alpha=1)
+                self.agent = patches.Circle((self.agent_x, self.agent_y), 5, fc=agent_color, alpha=1)
                 # self.ax.add_patch(self.agent)
                 # render agent as triangle (arrow) facing the direction of the last action
                 # the last action is of the form [x,y] with x,y in [-1,1]
@@ -223,12 +223,22 @@ class Nav2dEnv(gym.Env):
                 # load car image
                 curr_path = os.path.dirname(os.path.abspath(__file__))
                 self.robot_img = plt.imread(curr_path + "/robot.png")
-                self.robot_size = 10
-                self.robot = self.ax.imshow(self.robot_img, extent=[self.agent_x-self.robot_size, self.agent_x+self.robot_size, self.agent_y-self.robot_size, self.agent_y+self.robot_size], alpha=1)
+                self.robot_size = 15
+                self.robot = self.ax.imshow(self.robot_img, extent=[self.agent_x-self.robot_size, self.agent_x+self.robot_size, self.agent_y-self.robot_size, self.agent_y+self.robot_size], alpha=1, zorder=10)
 
+                if subgoals is not None:
+                    for index, subgoal in enumerate(subgoals):
+                        print("subgoal", subgoal)
+                        # make circular subgoals
+                        self.ax.add_patch(
+                            patches.Circle(
+                                (subgoal[0], subgoal[1]), 5, fc=subgoal_colors[index])
+                        )
+                        
             # show figure
             # leave a trace of the agent
-            new_agent = patches.Circle((self.agent_x, self.agent_y), 5, fc='b', alpha=0.01)
+            # with high color saturation
+            new_agent = patches.Circle((self.agent_x, self.agent_y), 5, fc=agent_color, alpha=0.1)
             self.ax.add_patch(new_agent)
             self.agent.center = (self.agent_x, self.agent_y)
             # self.ax.add_patch(self.agent)
