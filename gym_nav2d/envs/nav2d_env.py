@@ -4,6 +4,12 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 import numpy as np
 import math, time
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.lines as lines
+import matplotlib.transforms as transforms
+import matplotlib.animation as animation
+from matplotlib.animation import FuncAnimation
 
 
 class Nav2dEnv(gym.Env):
@@ -164,16 +170,10 @@ class Nav2dEnv(gym.Env):
         self.last_action = np.array([0, 0])
         return self._normalize_observation(obs)
 
-    def render(self, mode='human', agent_color='b', subgoals=None, subgoal_colors=None):
+    def render(self, mode='human', agent_color='b', subgoals=None, subgoal_colors=None, trace=True):
         if mode == 'ansi':
             return self._observation()
-        elif mode == 'human':
-            import matplotlib.pyplot as plt
-            import matplotlib.patches as patches
-            import matplotlib.lines as lines
-            import matplotlib.transforms as transforms
-            import matplotlib.animation as animation
-            from matplotlib.animation import FuncAnimation
+        elif mode == 'human' or mode == 'rgb':
 
             # create figure
             if self.viewer is None:
@@ -238,10 +238,11 @@ class Nav2dEnv(gym.Env):
             # show figure
             # leave a trace of the agent
             # with high color saturation
-            new_agent = patches.Circle((self.agent_x, self.agent_y), 5, fc=agent_color, alpha=0.1)
-            self.ax.add_patch(new_agent)
-            self.agent.center = (self.agent_x, self.agent_y)
-            # self.ax.add_patch(self.agent)
+            if trace:
+                new_agent = patches.Circle((self.agent_x, self.agent_y), 5, fc=agent_color, alpha=0.1)
+                self.ax.add_patch(new_agent)
+                self.agent.center = (self.agent_x, self.agent_y)
+                # self.ax.add_patch(self.agent)
             # update the robot image
             self.robot.set_extent([self.agent_x-self.robot_size, self.agent_x+self.robot_size, self.agent_y-self.robot_size, self.agent_y+self.robot_size])
 
@@ -255,6 +256,14 @@ class Nav2dEnv(gym.Env):
 
             self.goal.center = (self.goal_x, self.goal_y)
             #self.line.set_data(*zip(*self.positions))
+            if mode == 'rgb':
+                # Convert the matplotlib plot to an RGB array
+                self.viewer.canvas.draw()
+                width, height = self.viewer.get_size_inches() * self.viewer.get_dpi()
+                mpl_image = np.frombuffer(self.viewer.canvas.tostring_rgb(), dtype='uint8')
+                mpl_image = mpl_image.reshape(int(height), int(width), 3)
+                return mpl_image
+
             self.viewer.canvas.draw()
             plt.pause(0.0001)
             return self.viewer
